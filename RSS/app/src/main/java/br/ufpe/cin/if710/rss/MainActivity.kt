@@ -39,6 +39,7 @@ class MainActivity : BaseActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
         db = SqlHelper.getInstance(this)
+        printRSS().execute(db)
     }
 
     override fun onResume() {
