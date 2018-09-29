@@ -43,27 +43,33 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        try{
-        RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
-        Log.i("RSS_FEED", RSS_FEED)
-            loadRSS().execute(RSS_FEED)
-        } catch(e: IOException) {
+        try {
+            RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
+            Log.i("RSS_FEED", RSS_FEED)
+            val downloadService = Intent(applicationContext, DownloadService::class.java)
+            downloadService.data = Uri.parse(RSS_FEED)
+            startService(downloadService)
+
+            printRSS().execute(db)
+        } catch (e: IOException) {
             e.printStackTrace()
         }
 
     }
 
 
-    internal inner class printRSS: AsyncTask<SqlHelper, Void, List<ItemRSS>>(){
-        override fun doInBackground(vararg db: SqlHelper): List<ItemRSS>?{
-            if(db[0].getItens() != null)
+    internal inner class printRSS : AsyncTask<SqlHelper, Void, List<ItemRSS>>() {
+        override fun doInBackground(vararg db: SqlHelper): List<ItemRSS>? {
+            if (db[0].getItens() != null)
                 return db[0].getItens()!!
             return null
         }
+
         override fun onPostExecute(result: List<ItemRSS>?) {
             super.onPostExecute(result)
-            if(result != null) {
-                viewAdapter = RssAdapter(result)
+            if (result != null) {
+                viewAdapter = RssAdapter(result, db)
+
                 conteudoRSS = findViewById<RecyclerView>(R.id.conteudoRSS).apply {
                     setHasFixedSize(true)
                     layoutManager = viewManager
@@ -72,50 +78,9 @@ class MainActivity : BaseActivity() {
             }
         }
     }
-    // VERIFICAR A QUERY DE SÓ RETORNAR OS NÃO LIDOS
-    @SuppressLint("StaticFieldLeak")
-    internal inner class loadRSS: AsyncTask<String, Void, List<ItemRSS>>(){
-        override fun doInBackground(vararg feed: String): List<ItemRSS> {
-            var in_: InputStream? = null
-            var rssFeed = ""
-            try {
-                val url = URL(feed[0])
-                val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
-                in_ = conn.getInputStream()
-                val out = ByteArrayOutputStream()
-                val buffer = ByteArray(1024)
-                var count: Int = in_.read(buffer)
-                while (count != -1) {
-                    out.write(buffer, 0, count)
-                    count = in_.read(buffer)
-                }
-                val response = out.toByteArray()
-                rssFeed = String(response, charset("UTF-8"))
 
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }finally {
-                if(in_ != null) {
-                    in_.close()
-                }
-            }
-            return parse(rssFeed)
-
-        }
-        //atualizanodo a activity após parsear as informações
-        override fun onPostExecute(result: List<ItemRSS>) {
-            super.onPostExecute(result)
-            for(i in result) {
-                if(db.getItemRSS(i.link) == null){
-                    db.insertItem(i)
-                    Log.i("inseriu", i.title)
-                }
-            }
-            printRSS().execute(db)
-        }
-    }
     //adapter para lidar com o RSS Feed
-    private inner class RssAdapter(private val result: List<ItemRSS>) :
+    private inner class RssAdapter(private val result: List<ItemRSS>, private val db: SqlHelper) :
             RecyclerView.Adapter<CardChangeHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardChangeHolder {
@@ -134,6 +99,7 @@ class MainActivity : BaseActivity() {
                 startActivity(intents)
             }
         }
+
         override fun getItemCount(): Int {
             return result.size
         }
@@ -141,7 +107,7 @@ class MainActivity : BaseActivity() {
     }
 
     //CardHolder com as informações que vão aparecer na tela de cada página
-    internal class CardChangeHolder (row: View) : RecyclerView.ViewHolder(row){
+    internal class CardChangeHolder(row: View) : RecyclerView.ViewHolder(row) {
         var title: TextView
         var pubDate: TextView
 
@@ -156,8 +122,8 @@ class MainActivity : BaseActivity() {
         }
 
     }
+
     companion object {
         val rssfeed = "uname"
     }
-
 }

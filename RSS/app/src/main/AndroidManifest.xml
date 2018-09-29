@@ -18,7 +18,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".PreferenceActivity" />
-
+        <service
+            android:name=".DownloadService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>
