@@ -1,4 +1,4 @@
-package br.ufpe.cin.if710.rss
+package br.ufpe.cin.if710.rss.RSSFiles
 
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException

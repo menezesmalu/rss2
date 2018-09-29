@@ -1,11 +1,6 @@
 package br.ufpe.cin.if710.rss
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
+import android.content.*
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
@@ -16,8 +11,9 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import br.ufpe.cin.if710.rss.RSSFiles.ItemRSS
 import java.io.IOException
-import br.ufpe.cin.if710.rss.broadcast.UpdateReceiver
 import br.ufpe.cin.if710.rss.db.SqlHelper
 
 class MainActivity : BaseActivity() {
@@ -28,6 +24,8 @@ class MainActivity : BaseActivity() {
     private lateinit var conteudoRSS: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
+
+    val DinReceiver = UpdateReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,34 +40,28 @@ class MainActivity : BaseActivity() {
         super.onResume()
         try {
             RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
-            Log.i("RSS_FEED", RSS_FEED)
+            registerReceiver(DinReceiver, intentFilter)
             val downloadService = Intent(applicationContext, DownloadService::class.java)
             downloadService.data = Uri.parse(RSS_FEED)
             startService(downloadService)
-            registerReceiver(receiver, intentFilter)
-            printRSS().execute(db)
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
     }
 
-    override fun onPause() {
-        super.onPause()
-        unregisterReceiver(receiver)
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(DinReceiver)
     }
 
-    internal inner class printRSS : AsyncTask<SqlHelper, Void, List<ItemRSS>>() {
-        override fun doInBackground(vararg db: SqlHelper): List<ItemRSS>? {
-            if (db[0].getItens() != null)
-                return db[0].getItens()!!
-            return null
-        }
-
-        override fun onPostExecute(result: List<ItemRSS>?) {
-            super.onPostExecute(result)
-            if (result != null) {
-                viewAdapter = RssAdapter(result, db)
+    inner class UpdateReceiver: BroadcastReceiver(){
+        override fun onReceive(ctx: Context?, i: Intent?) {
+            Log.i("update", "entrou no update")
+            Toast.makeText(ctx, "update receiver!!", Toast.LENGTH_LONG).show()
+            val list = db.getItens()
+            if (list != null) {
+                viewAdapter = RssAdapter(list, db)
                 conteudoRSS = findViewById<RecyclerView>(R.id.conteudoRSS).apply {
                     setHasFixedSize(true)
                     layoutManager = viewManager
@@ -127,6 +119,5 @@ class MainActivity : BaseActivity() {
         val rssfeed = "rssfeed"
         val ATT_BROADCAST = "br.ufpe.cin.if710.broadcasts.dinamico"
         val intentFilter = IntentFilter(ATT_BROADCAST)
-        val receiver = UpdateReceiver()
     }
 }

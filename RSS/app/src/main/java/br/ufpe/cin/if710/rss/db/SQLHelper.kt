@@ -3,11 +3,10 @@ package br.ufpe.cin.if710.rss.db
 import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import br.ufpe.cin.if710.rss.ItemRSS
+import br.ufpe.cin.if710.rss.RSSFiles.ItemRSS
 import org.jetbrains.anko.db.*
 import android.content.ContentValues
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 
 
 class SqlHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DB_VERSION) {
