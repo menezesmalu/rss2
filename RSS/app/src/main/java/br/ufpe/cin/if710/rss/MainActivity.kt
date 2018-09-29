@@ -20,11 +20,12 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import br.ufpe.cin.if710.rss.ParserRSS.parse
+import br.ufpe.cin.if710.rss.db.SqlHelper
 
 class MainActivity : BaseActivity() {
     private var RSS_FEED = ""
     lateinit var prefs: SharedPreferences
-
+    lateinit var db: SqlHelper
     //conteudoRSS é um recycler view
     private lateinit var conteudoRSS: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -37,7 +38,7 @@ class MainActivity : BaseActivity() {
         viewManager = LinearLayoutManager(this)
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
-
+        db = SqlHelper.getInstance(this)
     }
 
     override fun onResume() {
@@ -45,7 +46,6 @@ class MainActivity : BaseActivity() {
         try{
         RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
         Log.i("RSS_FEED", RSS_FEED)
-
             loadRSS().execute(RSS_FEED)
         } catch(e: IOException) {
             e.printStackTrace()
@@ -54,6 +54,25 @@ class MainActivity : BaseActivity() {
     }
 
 
+    internal inner class printRSS: AsyncTask<SqlHelper, Void, List<ItemRSS>>(){
+        override fun doInBackground(vararg db: SqlHelper): List<ItemRSS>?{
+            if(db[0].getItens() != null)
+                return db[0].getItens()!!
+            return null
+        }
+        override fun onPostExecute(result: List<ItemRSS>?) {
+            super.onPostExecute(result)
+            if(result != null) {
+                viewAdapter = RssAdapter(result)
+                conteudoRSS = findViewById<RecyclerView>(R.id.conteudoRSS).apply {
+                    setHasFixedSize(true)
+                    layoutManager = viewManager
+                    adapter = viewAdapter
+                }
+            }
+        }
+    }
+    // VERIFICAR A QUERY DE SÓ RETORNAR OS NÃO LIDOS
     @SuppressLint("StaticFieldLeak")
     internal inner class loadRSS: AsyncTask<String, Void, List<ItemRSS>>(){
         override fun doInBackground(vararg feed: String): List<ItemRSS> {
@@ -86,12 +105,13 @@ class MainActivity : BaseActivity() {
         //atualizanodo a activity após parsear as informações
         override fun onPostExecute(result: List<ItemRSS>) {
             super.onPostExecute(result)
-            viewAdapter = RssAdapter(result)
-            conteudoRSS = findViewById<RecyclerView>(R.id.conteudoRSS).apply {
-                setHasFixedSize(true)
-                layoutManager = viewManager
-                adapter = viewAdapter
+            for(i in result) {
+                if(db.getItemRSS(i.link) == null){
+                    db.insertItem(i)
+                    Log.i("inseriu", i.title)
+                }
             }
+            printRSS().execute(db)
         }
     }
     //adapter para lidar com o RSS Feed
