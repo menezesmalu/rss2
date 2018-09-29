@@ -11,5 +11,4 @@ class FinishedReceiver : BroadcastReceiver() {
         Toast.makeText(ctx, "RSS baixado", Toast.LENGTH_LONG).show()
         Log.i("FinishedReceiver", "baixou o rss")
     }
-
 }

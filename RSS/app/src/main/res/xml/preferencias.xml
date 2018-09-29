@@ -3,7 +3,7 @@
     android:key="@+id/pref_screen">
     <PreferenceCategory android:title="Feed">
         <EditTextPreference
-            android:key="uname"
+            android:key="rssfeed"
             android:dialogMessage="rss"
             android:dialogTitle="Alterar rss link"
             android:negativeButtonText="Cancelar"

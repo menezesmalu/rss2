@@ -30,6 +30,10 @@
                 <action android:name="br.ufpe.cin.if710.rss.completo" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".broadcast.UpdateReceiver"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

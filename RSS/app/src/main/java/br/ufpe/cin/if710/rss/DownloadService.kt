@@ -3,9 +3,11 @@ package br.ufpe.cin.if710.rss
 import android.annotation.SuppressLint
 import android.app.IntentService
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.AsyncTask
 import android.util.Log
 import br.ufpe.cin.if710.rss.ParserRSS.parse
+import br.ufpe.cin.if710.rss.broadcast.UpdateReceiver
 import br.ufpe.cin.if710.rss.db.SqlHelper
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -15,7 +17,6 @@ import java.net.URL
 
 class DownloadService : IntentService("DownloadService") {
     var inseridos: Int = 0
-    //lateinit var db: SqlHelper
 
     override fun onHandleIntent(i: Intent?){
         var in_: InputStream? = null
@@ -53,6 +54,7 @@ class DownloadService : IntentService("DownloadService") {
             }
             if(inseridos > 0)
                 sendBroadcast(Intent(completo))
+            sendBroadcast(Intent(MainActivity.ATT_BROADCAST))
         }
     }
     companion object {
