@@ -130,6 +130,7 @@ class MainActivity : BaseActivity() {
                 val url = result[position].link
                 val uri = Uri.parse(url)
                 val intents = Intent(Intent.ACTION_VIEW, uri)
+                db.markAsRead(url)
                 startActivity(intents)
             }
         }
