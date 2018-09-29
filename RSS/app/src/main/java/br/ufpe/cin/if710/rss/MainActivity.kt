@@ -3,11 +3,14 @@ package br.ufpe.cin.if710.rss
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -18,8 +21,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import br.ufpe.cin.if710.rss.ParserRSS.parse
 
-class MainActivity : Activity() {
+class MainActivity : BaseActivity() {
     private var RSS_FEED = ""
+    lateinit var prefs: SharedPreferences
 
     //conteudoRSS é um recycler view
     private lateinit var conteudoRSS: RecyclerView
@@ -31,19 +35,24 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
         conteudoRSS = findViewById(R.id.conteudoRSS)
         viewManager = LinearLayoutManager(this)
-        //iniciando o RSS url com a url no res
-        RSS_FEED = getString(R.string.rssfeed)
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
 
     }
 
-    override fun onStart(){
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         try{
+        RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
+        Log.i("RSS_FEED", RSS_FEED)
+
             loadRSS().execute(RSS_FEED)
         } catch(e: IOException) {
             e.printStackTrace()
         }
+
     }
+
 
     @SuppressLint("StaticFieldLeak")
     internal inner class loadRSS: AsyncTask<String, Void, List<ItemRSS>>(){
@@ -125,6 +134,9 @@ class MainActivity : Activity() {
             pubDate.text = rss.pubDate
         }
 
+    }
+    companion object {
+        val rssfeed = "uname"
     }
 
 }

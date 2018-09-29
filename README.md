@@ -32,7 +32,7 @@ Para entregar o exercício, responda o [formulário de entrega](https://docs.goo
 
 | Passo | Completou? |
 | ------ | ------ |
-| 9 | **não** |
+| 9 | **sim** |
 | 10 | **não** |
 | 11 | **não** |
 | 12 | **não** |
