@@ -1,6 +1,5 @@
 package br.ufpe.cin.if710.rss
 
-import android.view.MenuInflater
 import android.app.Activity
 import android.content.Intent
 import android.view.Menu

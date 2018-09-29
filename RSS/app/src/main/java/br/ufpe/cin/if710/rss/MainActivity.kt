@@ -2,16 +2,13 @@ package br.ufpe.cin.if710.rss
 
 import android.content.*
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import br.ufpe.cin.if710.rss.RSSFiles.ItemRSS
 import java.io.IOException
 import br.ufpe.cin.if710.rss.db.SqlHelper
@@ -57,8 +54,6 @@ class MainActivity : BaseActivity() {
 
     inner class UpdateReceiver: BroadcastReceiver(){
         override fun onReceive(ctx: Context?, i: Intent?) {
-            Log.i("update", "entrou no update")
-            Toast.makeText(ctx, "update receiver!!", Toast.LENGTH_LONG).show()
             val list = db.getItens()
             if (list != null) {
                 viewAdapter = RssAdapter(list, db)
