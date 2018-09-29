@@ -14,12 +14,15 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class DownloadService : IntentService("DownloadService") {
-    var inseridos = 0
+    var inseridos: Int = 0
+    //lateinit var db: SqlHelper
+
     override fun onHandleIntent(i: Intent?){
         var in_: InputStream? = null
-        val db = SqlHelper.getInstance(this)
+        var db = SqlHelper.getInstance(this)
         var rssFeed = ""
         try {
+            inseridos = 0
             val url = URL(i!!.data.toString())
             val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
             in_ = conn.getInputStream()
@@ -37,15 +40,22 @@ class DownloadService : IntentService("DownloadService") {
                 if(db.getItemRSS(i.link) == null){
                     db.insertItem(i)
                     Log.i("inseriu", i.title)
+                    inseridos++
                 }
             }
+
+
         } catch (e: IOException) {
             e.printStackTrace()
         }finally {
             if(in_ != null) {
                 in_.close()
             }
-
+            if(inseridos > 0)
+                sendBroadcast(Intent(completo))
         }
+    }
+    companion object {
+        val completo = "br.ufpe.cin.if710.rss.completo"
     }
 }

@@ -39,7 +39,7 @@ class MainActivity : BaseActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         RSS_FEED = prefs.getString(rssfeed, getString(R.string.rssfeed))
         db = SqlHelper.getInstance(this)
-        printRSS().execute(db)
+        //printRSS().execute(db)
     }
 
     override fun onResume() {
@@ -50,7 +50,6 @@ class MainActivity : BaseActivity() {
             val downloadService = Intent(applicationContext, DownloadService::class.java)
             downloadService.data = Uri.parse(RSS_FEED)
             startService(downloadService)
-
             printRSS().execute(db)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -70,7 +69,6 @@ class MainActivity : BaseActivity() {
             super.onPostExecute(result)
             if (result != null) {
                 viewAdapter = RssAdapter(result, db)
-
                 conteudoRSS = findViewById<RecyclerView>(R.id.conteudoRSS).apply {
                     setHasFixedSize(true)
                     layoutManager = viewManager
